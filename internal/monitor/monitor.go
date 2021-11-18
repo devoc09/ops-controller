@@ -12,8 +12,7 @@ import (
 type Monitor struct {
 	targetDir string
 	instance  *instance.Instance
-	// instance instance.Instance
-	Msg chan instance.Instance // to communicate with the controller
+	Msg       chan instance.Instance // to communicate with the controller
 }
 
 func New() (m *Monitor) {
