@@ -5,8 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
+
+	"github.com/devoc09/ops-wrap/controller/instance"
 )
 
 func homeDir(home string) (string, error) {
@@ -33,14 +34,14 @@ func controllerHome() string {
 		panic(err)
 	}
 
-	ctrhome := path.Join(home, ".ops-controller")
+	ctrhome := filepath.Join(home, ".ops-controller")
 	return ctrhome
 }
 
 func createCtrInstanceDir() error {
 	ctrhome := controllerHome()
 
-	if err := os.MkdirAll(path.Join(ctrhome, "instances"), 0777); err != nil {
+	if err := os.MkdirAll(filepath.Join(ctrhome, "instances"), 0777); err != nil {
 		return fmt.Errorf("make ControllerDir Error: %w", err)
 	}
 	return nil
@@ -82,12 +83,14 @@ func writeCtrInstanceFile(src string) error {
 
 	// write controllerInstance info to dst-file.
 	decoder := json.NewDecoder(srcfile)
-	var i Instance
+	// var i Instance
+	var i instance.Instance
 	if err := decoder.Decode(&i); err != nil {
 		return fmt.Errorf("Instance json file Decode Error: %w", err)
 	}
 	encoder := json.NewEncoder(dst)
-	ctri := ControllerInstance{i.Instance, i.Image, i.Ports, true}
+	// ctri := ControllerInstance{i.Instance, i.Image, i.Ports, true}
+	ctri := instance.ControllerInstance{i.Instance, i.Image, i.Ports, true}
 	if err := encoder.Encode(ctri); err != nil {
 		return fmt.Errorf("Error ControllerInstance json Encode to .ops-controller/instances/ : %w", err)
 	}
@@ -98,15 +101,24 @@ func writeCtrInstanceFile(src string) error {
 	return nil
 }
 
-type Instance struct {
-	Instance string   `json:"instance"`
-	Image    string   `json:"image"`
-	Ports    []string `json:"ports"`
-}
+// func getPID(abs string) string {
+// 	return getFileName(abs)
+// }
 
-type ControllerInstance struct {
-	Instance string   `json:"instance"`
-	Image    string   `json:"image"`
-	Ports    []string `json:"ports"`
-	AutoHeal bool     `json:"autoheal"`
-}
+// func getTargetProcessAbs(abs string) (targetAbs string) {
+// 	targetAbs = filepath.Join("/", "proc", getPID(abs))
+// 	return
+// }
+
+// type Instance struct {
+// 	Instance string   `json:"instance"`
+// 	Image    string   `json:"image"`
+// 	Ports    []string `json:"ports"`
+// }
+
+// type ControllerInstance struct {
+// 	Instance string   `json:"instance"`
+// 	Image    string   `json:"image"`
+// 	Ports    []string `json:"ports"`
+// 	AutoHeal bool     `json:"autoheal"`
+// }

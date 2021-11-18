@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/devoc09/ops-wrap/internal/monitor"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -15,7 +16,7 @@ func newWatcher() (*fsnotify.Watcher, error) {
 	return watcher, nil
 }
 
-func Watch(target string) {
+func Watch(targets []string) {
 	watcher, _ := newWatcher()
 
 	defer watcher.Close()
@@ -26,33 +27,47 @@ func Watch(target string) {
 			select {
 			case event, ok := <-watcher.Events:
 				if !ok {
+					done <- true
 					return
 				}
-				// log.Println("event:", event)
-				// if event.Op&fsnotify.Write == fsnotify.Write {
-				// 	log.Println("modified file:", event.Name)
-				// }
+				// monCh := make(chan *instance.Instance)
+				mon := monitor.New()
+
 				switch eventType := getEventType(event); eventType {
 				// case "Write":
 				case "Create":
 					fmt.Printf("Create: %s\n", getFileName(event.Name))
-					if err := writeCtrInstanceFile(event.Name); err != nil {
-						fmt.Printf("Failed Create Controller Instance File: %s\n", getFileName(event.Name))
-						fmt.Println(err)
-						return
-					}
+					go func() {
+						mon.Start(event.Name)
+					}()
+					// if err := writeCtrInstanceFile(event.Name); err != nil {
+					// 	fmt.Printf("Failed Create Controller Instance File: %s\n", getFileName(event.Name))
+					// 	fmt.Println(err)
+					// 	return
+					// }
 				case "Remove":
-					fmt.Printf("Remove: %s\n", getFileName(event.Name))
-					if err := healInstance(event.Name); err != nil {
-						fmt.Printf("Failed Heal Instance: %s\n", getFileName(event.Name))
-						fmt.Println(err)
-						return
-					}
-				// case "Rename":
-				default:
+					// fmt.Printf("Remove: %s\n", getFileName(event.Name))
+					// if err := healInstance(event.Name); err != nil {
+					// 	fmt.Printf("Failed Heal Instance: %s\n", getFileName(event.Name))
+					// 	fmt.Println(err)
+					// 	return
+					// }
 				}
+				// // process branching to a message from monitor
+				// select {
+				// case monMsg := <-mon.Msg:
+				// 	fmt.Printf("channel received......\n")
+				// 	fmt.Println(monMsg)
+				// 	err := exec.Command("ops", "instance", "create", "ops-hello", "-p", "8080").Start()
+				// 	if err != nil {
+				// 		fmt.Println(err)
+				// 	} else {
+				// 		fmt.Println("instance heal Succeeded!!")
+				// 	}
+				// }
 			case err, ok := <-watcher.Errors:
 				if !ok {
+					done <- true
 					return
 				}
 				log.Println("error:", err)
@@ -60,10 +75,13 @@ func Watch(target string) {
 		}
 	}()
 
-	err := watcher.Add(target)
-	if err != nil {
-		fmt.Println(err)
-		return
+	// add watching directory
+	for _, t := range targets {
+		err := watcher.Add(t)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 	<-done
 }

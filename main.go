@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"github.com/devoc09/ops-wrap/controller"
+	"github.com/devoc09/ops-wrap/controller/instance"
 )
 
 func main() {
@@ -47,7 +48,7 @@ func main() {
 			panic(err)
 		}
 
-		var i controller.Instance
+		var i instance.Instance
 		if err := json.Unmarshal(body, &i); err != nil {
 			panic(err)
 		}
@@ -55,8 +56,9 @@ func main() {
 		fmt.Println(i)
 	}
 
-	// Watch Directory
-	controller.Watch(instancePath)
+	targets := []string{instancePath}
+	// Watch targets
+	controller.Watch(targets)
 }
 
 var homeDir = ""

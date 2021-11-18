@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/devoc09/ops-wrap/controller/instance"
 )
 
 func healInstance(src string) error {
@@ -19,7 +21,7 @@ func healInstance(src string) error {
 	defer config.Close()
 
 	decoder := json.NewDecoder(config)
-	var ctri ControllerInstance
+	var ctri instance.ControllerInstance
 	if err := decoder.Decode(&ctri); err != nil {
 		return fmt.Errorf("Error decode ControllerInstance config file: %w", err)
 	}
