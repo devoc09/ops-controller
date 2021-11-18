@@ -39,10 +39,10 @@ func (m *Monitor) Start(abs string) {
 				// } else {
 				// 	fmt.Printf("PID: %s Alive\n", filepath.Base(abs))
 				// }
-
 			}
 		}
 	}()
+
 	select {
 	case healInstance := <-m.Msg:
 		fmt.Printf("channel received......\n")
