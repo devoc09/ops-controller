@@ -31,27 +31,21 @@ func Watch(targets []string) {
 					return
 				}
 				// monCh := make(chan *instance.Instance)
-				mon := monitor.New()
 
 				switch eventType := getEventType(event); eventType {
-				// case "Write":
 				case "Create":
+					m := monitor.New(event.Name)
 					fmt.Printf("Create: %s\n", getFileName(event.Name))
 					go func() {
-						mon.Start(event.Name)
+						m.Start(event.Name)
 					}()
-					// if err := writeCtrInstanceFile(event.Name); err != nil {
-					// 	fmt.Printf("Failed Create Controller Instance File: %s\n", getFileName(event.Name))
-					// 	fmt.Println(err)
-					// 	return
-					// }
+					go func() {
+						if err := m.CreateMonitorFile(event.Name); err != nil {
+							return
+						}
+					}()
 				case "Remove":
-					// fmt.Printf("Remove: %s\n", getFileName(event.Name))
-					// if err := healInstance(event.Name); err != nil {
-					// 	fmt.Printf("Failed Heal Instance: %s\n", getFileName(event.Name))
-					// 	fmt.Println(err)
-					// 	return
-					// }
+
 				}
 				// // process branching to a message from monitor
 				// select {

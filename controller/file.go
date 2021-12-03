@@ -94,10 +94,7 @@ func writeCtrInstanceFile(src string) error {
 	if err := encoder.Encode(ctri); err != nil {
 		return fmt.Errorf("Error ControllerInstance json Encode to .ops-controller/instances/ : %w", err)
 	}
-	// _, err = io.Copy(dst, srcfile)
-	// if err != nil {
-	// 	return fmt.Errorf("io.Copy() Errof: %w\n", err)
-	// }
+
 	return nil
 }
 
